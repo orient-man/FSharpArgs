@@ -8,10 +8,10 @@ type ParsingResult(valuesIn: Map<char, obj>) =
             | Some(v) -> System.Convert.ToBoolean(v)
             | None -> false
 
-let Parse (schema:string) args =
+let Parse schema args =
     let values =
         schema
         |> Seq.map (fun s -> (s, box true))
         |> Map.ofSeq
 
-    new ParsingResult(values)
+    ParsingResult values
