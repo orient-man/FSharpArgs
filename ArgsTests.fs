@@ -1,6 +1,8 @@
 ﻿module FSharpArgs.ArgsTests
 open NUnit.Framework
+open Args
 
 [<Test>]
-let ``When 2 is added to 2 expect 4``() = 
-    Assert.AreEqual(4, 2 + 2)
+let ``Parses with no schema or arguments``() =
+    let result = Parse "" Array.empty<string>
+    Assert.IsTrue(Map.isEmpty result)
