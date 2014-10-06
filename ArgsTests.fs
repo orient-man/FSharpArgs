@@ -1,24 +1,25 @@
 ﻿module FSharpArgs.ArgsTests
-open NUnit.Framework
 open Args
+open FsUnit
+open NUnit.Framework
 
 [<Test>]
 let ``Parses with no schema or arguments``() =
     let result = Parse "" []
-    Assert.AreEqual(0, result.Cordinality)
+    result.Cordinality |> should equal 0
 
 [<Test>]
 let ``Simple bool present``() =
     let result = Parse "x" ["-x"]
-    Assert.IsTrue(result.GetBool 'x')
+    result.GetBool 'x' |> should be True
 
 [<Test>]
 let ``Multiple bool arguments``() =
     let result = Parse "xy" ["-xy"]
-    Assert.IsTrue(result.GetBool 'x')
-    Assert.IsTrue(result.GetBool 'y')
+    result.GetBool 'x' |> should be True
+    result.GetBool 'y' |> should be True
 
 [<Test>]
 let ``Simple bool not present``() =
     let result = Parse "x" []
-    Assert.IsFalse(result.GetBool 'x')
+    result.GetBool 'x' |> should be False
