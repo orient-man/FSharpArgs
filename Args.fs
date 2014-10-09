@@ -1,22 +1,17 @@
 ﻿module FSharpArgs.Args
 
-type ParsingResult(valuesIn: Map<char, obj>) =
-    let values = valuesIn
+type ParsingResult(values: Map<char, obj>) =
+    let getValue arg convert defaultValue =
+        match values.TryFind arg with
+        | Some(v) -> convert v
+        | None -> defaultValue
+
     member this.Cordinality = values.Count
-
-    member this.GetBool arg =
-        match values.TryFind arg with
-        | Some(v) -> System.Convert.ToBoolean(v)
-        | None -> false
-
-    member this.GetString arg =
-        match values.TryFind arg with
-        | Some(v) -> v.ToString()
-        | None -> ""
+    member this.GetBool arg = getValue arg System.Convert.ToBoolean false
+    member this.GetString arg = getValue arg (fun v -> v.ToString()) ""
 
 let ParseSchema (schema: string) =
     let BoolMarshaler args = (box true, args)
-
     let StringMarshaler args =
         (box (args |> Seq.head), args |> Seq.skip 1)
 
