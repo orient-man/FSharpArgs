@@ -48,7 +48,7 @@ let Parse (schema: string) args =
 
     let rec parseArguments current =
         let (values, args) = current
-        if args |> Seq.isEmpty
+        if Seq.isEmpty args
         then values
         else parseArgument args |> appendParsingResult current |> parseArguments
 
