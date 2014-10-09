@@ -10,11 +10,10 @@ type ParsingResult(values: Map<char, obj>) =
     member this.GetBool arg = getValue arg System.Convert.ToBoolean false
     member this.GetString arg = getValue arg (fun v -> v.ToString()) ""
 
-let ParseSchema (schema: string) =
-    let BoolMarshaler args = (box true, args)
-    let StringMarshaler args =
-        (box (args |> Seq.head), args |> Seq.skip 1)
+let BoolMarshaler args = (box true, args)
+let StringMarshaler args = (box (args |> Seq.head), args |> Seq.skip 1)
 
+let ParseSchema (schema: string) =
     let parseSchemaElement element =
         match element with
         | (c, "*") -> (c, StringMarshaler)
