@@ -43,18 +43,14 @@ let Parse (schema: string) args =
     let appendParsingResult current result =
         let (values, args) = current
         match result with
-        | Some((value, args)) ->
-            (values |> Seq.append [value], args)
+        | Some((value, args)) -> (values |> Seq.append [value], args)
         | None -> (values, args |> Seq.skip 1)
 
     let rec parseArguments current =
         let (values, args) = current
         if args |> Seq.isEmpty
         then values
-        else
-            parseArgument args
-            |> appendParsingResult current
-            |> parseArguments
+        else parseArgument args |> appendParsingResult current |> parseArguments
 
     let values = parseArguments (Seq.empty, args) |> Map.ofSeq
 
