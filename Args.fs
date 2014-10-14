@@ -1,7 +1,7 @@
 ﻿module FSharpArgs.Args
 
-type ParsingResult(values) =
-    let getValue arg (convert: obj -> 'a) defaultValue =
+type ParsingResult(values: Map<char, obj>) =
+    let getValue arg convert defaultValue =
         match values |> Map.tryFind arg with
         | Some(v) -> convert v
         | None -> defaultValue
@@ -13,40 +13,41 @@ type ParsingResult(values) =
 let BoolMarshaler args = (box true, args)
 let StringMarshaler = function | [] -> (box "", []) | (head::tail) -> (box head, tail)
 
-let parseSchema (schema: string) =
-    let parseSchemaElement = function
-        | (c, "*") -> (c, StringMarshaler)
-        | (c, _) -> (c, BoolMarshaler)
-
-    schema.Split ','
-    |> Seq.map (fun s -> s.Trim())
-    |> Seq.filter (fun s -> s.Length > 0)
-    |> Seq.map (fun s -> (s.[0], s.Substring(1)))
-    |> Seq.map parseSchemaElement
-    |> Map.ofSeq
-
 let parse (schema: string) args =
-    let marshalers = parseSchema schema
+    let parseSchema =
+        let marshalers =
+            let parseSchemaElement = function
+                | (c, "*") -> (c, StringMarshaler)
+                | (c, _) -> (c, BoolMarshaler)
 
-    let (|ValidArgument|_|) arg =
-        match List.ofSeq arg with | ('-'::c::_) -> Some(c) | _ -> None
+            schema.Split ','
+            |> Seq.map (fun s -> s.Trim())
+            |> Seq.filter (fun s -> s.Length > 0)
+            |> Seq.map (fun s -> (s.[0], s.Substring(1)))
+            |> Seq.map parseSchemaElement
+            |> Map.ofSeq
 
-    let parseArgument = function
-        | (ValidArgument c::args) ->
-            let (value, args) = marshalers.[c] args
-            Some((c, value), args)
-        | _ -> None
+        fun arg -> marshalers |> Map.find arg
 
-    let appendParsingResult (values, args) = function
-        | Some((value, args)) -> (value::values, args)
-        | None -> (values, args |> List.tail)
+    let parse findMarshaler =
+        let rec parseArguments current =
+            let (|ValidArgument|_|) arg =
+                match List.ofSeq arg with | ('-'::c::_) -> Some(c) | _ -> None
 
-    let rec parseArguments current =
-        match current with
-        | (values, []) -> values
-        | (values, args) ->
-            parseArgument args |> appendParsingResult current |> parseArguments
+            let parseArgument = function
+                | (ValidArgument c::args) ->
+                    let (value, args) = args |> findMarshaler c
+                    Some((c, value), args)
+                | _ -> None
 
-    let values = parseArguments ([], args) |> Map.ofSeq
+            let append (values, args) = function
+                | Some((value, args)) -> (value::values, args)
+                | None -> (values, args |> List.tail)
 
-    ParsingResult values
+            match current with
+            | (values, []) -> values
+            | (values, args) -> parseArgument args |> append current |> parseArguments
+
+        ParsingResult(parseArguments ([], args) |> Map.ofSeq)
+
+    parse parseSchema 
