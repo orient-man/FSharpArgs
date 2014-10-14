@@ -29,7 +29,7 @@ let parse (schema: string) args =
 
         fun arg -> marshalers |> Map.find arg
 
-    let parse findMarshaler =
+    let parseArguments findMarshaler =
         let rec parseArguments (values, args) =
             let (|ValidArgument|_|) arg =
                 match List.ofSeq arg with | ('-'::c::_) -> Some(c) | _ -> None
@@ -50,4 +50,4 @@ let parse (schema: string) args =
 
         ParsingResult(parseArguments ([], args) |> Map.ofSeq)
 
-    parse parseSchema 
+    parseArguments parseSchema 
