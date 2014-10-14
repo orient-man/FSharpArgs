@@ -30,7 +30,7 @@ let parse (schema: string) args =
         fun arg -> marshalers |> Map.find arg
 
     let parse findMarshaler =
-        let rec parseArguments current =
+        let rec parseArguments (values, args) =
             let (|ValidArgument|_|) arg =
                 match List.ofSeq arg with | ('-'::c::_) -> Some(c) | _ -> None
 
@@ -40,13 +40,13 @@ let parse (schema: string) args =
                     Some((c, value), args)
                 | _ -> None
 
-            let append (values, args) = function
+            let append = function
                 | Some((value, args)) -> (value::values, args)
                 | None -> (values, args |> List.tail)
 
-            match current with
-            | (values, []) -> values
-            | (values, args) -> parseArgument args |> append current |> parseArguments
+            match args with
+            | [] -> values
+            | _ -> parseArgument args |> append |> parseArguments
 
         ParsingResult(parseArguments ([], args) |> Map.ofSeq)
 
