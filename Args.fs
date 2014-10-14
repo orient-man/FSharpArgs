@@ -13,7 +13,7 @@ type ParsingResult(values) =
 let BoolMarshaler args = (box true, args)
 let StringMarshaler = function | [] -> (box "", []) | (head::tail) -> (box head, tail)
 
-let ParseSchema (schema: string) =
+let parseSchema (schema: string) =
     let parseSchemaElement = function
         | (c, "*") -> (c, StringMarshaler)
         | (c, _) -> (c, BoolMarshaler)
@@ -25,8 +25,8 @@ let ParseSchema (schema: string) =
     |> Seq.map parseSchemaElement
     |> Map.ofSeq
 
-let Parse (schema: string) args =
-    let marshalers = ParseSchema schema
+let parse (schema: string) args =
+    let marshalers = parseSchema schema
 
     let (|ValidArgument|_|) arg =
         match List.ofSeq arg with | ('-'::c::_) -> Some(c) | _ -> None
