@@ -1,8 +1,8 @@
 ﻿module FSharpArgs.Args
 
-type ParsingResult(values: Map<char, obj>) =
-    let getValue arg convert defaultValue =
-        match values.TryFind arg with
+type ParsingResult(values) =
+    let getValue arg (convert: obj -> 'a) defaultValue =
+        match values |> Map.tryFind arg with
         | Some(v) -> convert v
         | None -> defaultValue
 
@@ -11,11 +11,10 @@ type ParsingResult(values: Map<char, obj>) =
     member this.GetString arg = getValue arg (fun v -> v.ToString()) ""
 
 let BoolMarshaler args = (box true, args)
-let StringMarshaler args = (box (args |> Seq.head), args |> Seq.skip 1)
+let StringMarshaler = function | [] -> (box "", []) | (head::tail) -> (box head, tail)
 
 let ParseSchema (schema: string) =
-    let parseSchemaElement element =
-        match element with
+    let parseSchemaElement = function
         | (c, "*") -> (c, StringMarshaler)
         | (c, _) -> (c, BoolMarshaler)
 
@@ -29,29 +28,25 @@ let ParseSchema (schema: string) =
 let Parse (schema: string) args =
     let marshalers = ParseSchema schema
 
-    let parseArgument args =
-        let firstArg: string = args |> Seq.head
-        if firstArg.StartsWith "-"
-        then
-            let c = firstArg |> Seq.skip 1 |> Seq.head
-            let args = args |> Seq.skip 1
+    let (|ValidArgument|_|) arg =
+        match List.ofSeq arg with | ('-'::c::_) -> Some(c) | _ -> None
+
+    let parseArgument = function
+        | (ValidArgument c::args) ->
             let (value, args) = marshalers.[c] args
             Some((c, value), args)
-        else
-            None
+        | _ -> None
 
-    let appendParsingResult current result =
-        let (values, args) = current
-        match result with
-        | Some((value, args)) -> (values |> Seq.append [value], args)
-        | None -> (values, args |> Seq.skip 1)
+    let appendParsingResult (values, args) = function
+        | Some((value, args)) -> (value::values, args)
+        | None -> (values, args |> List.tail)
 
     let rec parseArguments current =
-        let (values, args) = current
-        if Seq.isEmpty args
-        then values
-        else parseArgument args |> appendParsingResult current |> parseArguments
+        match current with
+        | (values, []) -> values
+        | (values, args) ->
+            parseArgument args |> appendParsingResult current |> parseArguments
 
-    let values = parseArguments (Seq.empty, args) |> Map.ofSeq
+    let values = parseArguments ([], args) |> Map.ofSeq
 
     ParsingResult values
