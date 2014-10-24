@@ -23,8 +23,7 @@ let parse (schema: string) args =
             schema.Split ','
             |> Seq.map (fun s -> s.Trim())
             |> Seq.filter (fun s -> s.Length > 0)
-            |> Seq.map (fun s -> (s.[0], s.Substring(1)))
-            |> Seq.map parseSchemaElement
+            |> Seq.map (fun s -> (s.[0], s.Substring(1)) |> parseSchemaElement)
             |> Map.ofSeq
 
         fun arg -> marshalers |> Map.find arg
@@ -35,9 +34,8 @@ let parse (schema: string) args =
                 match List.ofSeq arg with | '-'::c::_ -> Some(c) | _ -> None
 
             let parseArgument = function
-                | (ValidArgument c::args) ->
-                    let (value, args) = args |> findMarshaler c
-                    Some((c, value), args)
+                | ValidArgument c::args ->
+                    args |> findMarshaler c |> fun (value, args) -> Some((c, value), args)
                 | _ -> None
 
             let append = function
