@@ -11,7 +11,7 @@ type ParsingResult(values: Map<char, obj>) =
     member this.GetString arg = getValue arg (fun v -> v.ToString()) ""
 
 let BoolMarshaler args = (box true, args)
-let StringMarshaler = function | [] -> (box "", []) | (head::tail) -> (box head, tail)
+let StringMarshaler = function | [] -> (box "", []) | head::tail -> (box head, tail)
 
 let parse (schema: string) args =
     let parseSchema =
@@ -32,7 +32,7 @@ let parse (schema: string) args =
     let parseArguments findMarshaler =
         let rec parseArguments (values, args) =
             let (|ValidArgument|_|) arg =
-                match List.ofSeq arg with | ('-'::c::_) -> Some(c) | _ -> None
+                match List.ofSeq arg with | '-'::c::_ -> Some(c) | _ -> None
 
             let parseArgument = function
                 | (ValidArgument c::args) ->
@@ -41,7 +41,7 @@ let parse (schema: string) args =
                 | _ -> None
 
             let append = function
-                | Some((value, args)) -> (value::values, args)
+                | Some(value, args) -> (value::values, args)
                 | None -> (values, args |> List.tail)
 
             match args with
