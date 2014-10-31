@@ -56,10 +56,11 @@
   <ItemGroup>
     <Compile Include="Args.fs" />
     <Compile Include="ArgsTests.fs" />
-    <Compile Include="Playground.fs" />
-    <Compile Include="Program.fs" />
     <None Include="App.config" />
     <Content Include="packages.config" />
+    <Compile Include="Playground.fs" />
+    <Compile Include="PlaygroundTests.fs" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FsUnit.NUnit">

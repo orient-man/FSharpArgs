@@ -1,4 +1,4 @@
-﻿module FSharpArgsProgram
+﻿module FSharpArgs.Program
 
 [<EntryPoint>]
 let main argv = 
