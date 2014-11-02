@@ -26,12 +26,11 @@ let summatrix = map sum >> sum
 
 type Tree<'a> = | Node of 'a * Tree<'a> list
 
-let rec foldtree f g a = function
-    | Node(label, subtrees) ->
-        f label (foldchildren f g a subtrees)
-and foldchildren f g a = function
-    | [] -> a
-    | subtree::rest ->
-        g (foldtree f g a subtree) (foldchildren f g a rest)
+let rec foldtree f g a tree =
+    let rec foldchildren f g a = function
+        | [] -> a
+        | tree::rest -> g (foldtree f g a tree) (foldchildren f g a rest)
+
+    match tree with | Node(label, subtrees) -> f label (foldchildren f g a subtrees)
 
 let sumtree = foldtree (+) (+) 0
