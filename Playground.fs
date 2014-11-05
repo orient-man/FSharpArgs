@@ -16,6 +16,7 @@ let append a b = foldr cons b a
 let count a n = n + 1
 let length list = foldr count 0 list
 let double = (*) 2
+let half x = x / 2 
 //let fandcons f = f >> cons
 //let doubleandcons = fandcons double
 //let doubleall = foldr doubleandcons []
@@ -35,3 +36,6 @@ let rec foldtree f g a tree =
 
 let sumtree = foldtree (+) (+) 0
 let labels tree = foldtree cons append [] tree
+let node x y = Node(x, y)
+let maptree f = foldtree (f >> node) cons []
+let (.+.) g f = f >> g

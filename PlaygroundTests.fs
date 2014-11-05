@@ -20,3 +20,7 @@ let ``all that stuff just works``() =
     let tree = (Node(1, Node(2, [])::Node(3, Node(4, [])::[])::[]))
     sumtree tree |> should equal 10
     labels tree |> should equal [1;2;3;4]
+    maptree double tree |> labels |> should equal [2;4;6;8]
+    tree |> maptree double |> maptree half |> should equal tree
+    (1, 3) |> (double .+. fst) |> should equal 2
+    (1, 3) |> (fst >> double) |> should equal 2
