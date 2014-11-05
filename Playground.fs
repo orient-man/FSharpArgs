@@ -34,3 +34,4 @@ let rec foldtree f g a tree =
     match tree with | Node(label, subtrees) -> f label (foldchildren f g a subtrees)
 
 let sumtree = foldtree (+) (+) 0
+let labels tree = foldtree cons append [] tree

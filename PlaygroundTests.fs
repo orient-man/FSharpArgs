@@ -17,4 +17,6 @@ let ``all that stuff just works``() =
     doubleall [1;2;3] |> should equal [2;4;6]
     summatrix [[1;2];[3;4]] |> should equal 10
     sumtree (Node(1, [Node(2, []); Node(3, [Node(4, [])])])) |> should equal 10
-    sumtree (Node(1, Node(2, [])::Node(3, Node(4, [])::[])::[])) |> should equal 10
+    let tree = (Node(1, Node(2, [])::Node(3, Node(4, [])::[])::[]))
+    sumtree tree |> should equal 10
+    labels tree |> should equal [1;2;3;4]
